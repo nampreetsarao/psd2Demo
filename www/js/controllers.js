@@ -16,6 +16,7 @@ angular.module('app.controllers', [])
 })
 
 .controller('showAllAccountCtrl', function($scope,StorageServiceForToken,$state,$http,AccountDetails,$resource,$ionicPopup,$ionicLoading) {
+  $ionicLoading.show(); 
   $scope.allAccountDetails=[];
   $scope.oauthData = StorageServiceForToken.getAll();
   if($scope.oauthData!=null){
@@ -28,6 +29,7 @@ angular.module('app.controllers', [])
   $http.get('http://169.44.112.56:8082/psd2api/my/banks/BARCGB/accounts').then(function(resp){
   		console.log('Success', resp); // JSON object
       $scope.allAccountDetails=resp;
+      $ionicLoading.hide(); 
   	}, function(err){
   		console.error('ERR', err);
       var alertPopup = $ionicPopup.alert({
@@ -41,7 +43,8 @@ angular.module('app.controllers', [])
   })
 
 
-.controller('aboutPSD2Ctrl', function($scope,StorageServiceForToken,$http,AccountDetails,$resource,$ionicPopup) {
+.controller('aboutPSD2Ctrl', function($scope,StorageServiceForToken,$http,AccountDetails,$resource,$ionicPopup,$ionicLoading) {
+  ionicLoading.show();
   $scope.accountDetails=[];
 
   $scope.oauthData = StorageServiceForToken.getAll();
@@ -55,8 +58,10 @@ angular.module('app.controllers', [])
   $http.get('http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/account').then(function(resp){
   		console.log('Success', resp); // JSON object
       $scope.accountDetails=resp;
+      ionicLoading.hide();
   	}, function(err){
   		console.error('ERR', err);
+      $ionicLoading.hide();
       var alertPopup = $ionicPopup.alert({
         title: 'Alert',
         template:'Did you authorize the app to access bank information? Error occured while calling the API:'+err.data.error+ ".More: "+err.statusText
@@ -103,7 +108,8 @@ angular.module('app.controllers', [])
  })
 
 
-  .controller('aboutPSD22Ctrl', function($scope, InformationService,$state,$ionicPopup) {
+  .controller('aboutPSD22Ctrl', function($scope, InformationService,$state,$ionicPopup,$ionicLoading) {
+    $ionicLoading.show();
     $scope.general=[];
     //Fetch general Information details from the API
     InformationService.general({value : 'general' }, {},
@@ -127,7 +133,7 @@ angular.module('app.controllers', [])
       $scope.bookmarks=message.response.additionalInfo;
     });
 
-
+    $ionicLoading.hide();
 
   })
 
@@ -165,7 +171,7 @@ angular.module('app.controllers', [])
        }
 
     $http.defaults.headers.common.Authorization=$scope.authorizationToken;
-    //$http.defaults.headers.common.Authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjY5MjIyOTUsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiYWViM2UxNTEtNjlhNi00MGVjLTgwMjAtOGFhNTFmYmNkMDRmIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.NXuuNGyo4GnX4aqW8PZoXDfmE_MmoGFXxbDK5ggrTxc';
+    //$http.defaults.headers.common.Authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMTYwMTYsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiZjAxMjBiOTItMmQzNS00NTU1LWFjODctY2M3MjhkZmNhMmZiIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.nJHwJO6FQVqCX26czQQu2bYYk8TpXq1sWYTFk0LEaHc';
     var interBankCount=0;
     var internationBankCount=0;
     var withInBankCount=0;        
@@ -264,7 +270,7 @@ angular.module('app.controllers', [])
   })
 
 
-  .controller('makeAPaymentCtrl', function($scope,$http, $ionicLoading, StorageServiceForToken) {
+  .controller('makeAPaymentCtrl', function($scope,$http, $ionicLoading, StorageServiceForToken,$ionicPopup) {
      $scope.makePaymentObj = {
           "type": "",
           "from": {
@@ -291,7 +297,7 @@ angular.module('app.controllers', [])
         }else{
           $scope.accountDetails='First authenticate and then make this call.';
         }
-        //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjY3NjQzMDIsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiZmI4Y2RhMGYtZGYyOS00Mzk3LTk4Y2ItN2YxNTM0MTlhMWNiIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.hAyB255VoPzb-87LcRkW999rf7iQJ7JIBdU_NovmwHA";
+        //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMTYwMTYsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiZjAxMjBiOTItMmQzNS00NTU1LWFjODctY2M3MjhkZmNhMmZiIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.nJHwJO6FQVqCX26czQQu2bYYk8TpXq1sWYTFk0LEaHc";
         $http.defaults.headers.common.Authorization=$scope.authorizationToken;
         $ionicLoading.show();
       $http.get('http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-request-types').then(function(resp){
@@ -299,6 +305,7 @@ angular.module('app.controllers', [])
           console.log('Success', resp);
           $scope.transactionTypes = resp.data;
         }, function(err){
+          $ionicLoading.hide();
           console.error('ERR', err);
           $ionicLoading.hide();
         });
@@ -313,14 +320,17 @@ angular.module('app.controllers', [])
         }
 
         $http.defaults.headers.common.Authorization=$scope.authorizationToken;  
-        //$http.defaults.headers.common.Authorization="Bearer d8494a26-df21-4c3e-ace3-ff701bf8c4b4";
+        //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMTYwMTYsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiZjAxMjBiOTItMmQzNS00NTU1LWFjODctY2M3MjhkZmNhMmZiIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.nJHwJO6FQVqCX26czQQu2bYYk8TpXq1sWYTFk0LEaHc";
          $http.post("http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-request-types/INTER_BANK/transaction-requests", $scope.makePaymentObj, {
             
         }).success(function(responseData) {
             //do stuff with response
             $ionicLoading.hide();
             console.log('Success', responseData);
-            alert("Successful Transaction");
+            var alertPopup = $ionicPopup.alert({
+            title: 'Make a Payment',
+            template:'Transaction successfully submitted.'
+          });
         });
 
       };
@@ -337,7 +347,7 @@ angular.module('app.controllers', [])
 
     
     $scope.click =  function(){
-      $ionicLoading.show({templateUrl:"templates/loading.html"});
+      $ionicLoading.show();
       //clearing the userProfile at the time of user login
       $scope.dataFromService=[];
       $scope.authTokenForLogin= btoa(this.userId+":"+this.password);
@@ -374,7 +384,7 @@ angular.module('app.controllers', [])
 
     .controller('signupCtrl', function($scope, CreateBankUser, SignUpService,$state,$ionicPopup, CreateClientForOAuth, $ionicLoading ) {
       $scope.signUpUser =  function(){
-      $ionicLoading.show({templateUrl:"templates/loading.html"});
+      $ionicLoading.show();
         //clearing the userProfile at the time of user login
       $scope.signupResponse=[];
       //Create client for OAuth
