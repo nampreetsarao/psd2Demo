@@ -1,0 +1,33 @@
+<ion-view title="Login"  hide-nav-bar="true" id="page4" style="background-color:#;" class=" ">
+    <ion-content padding="true" class="manual-ios-statusbar-padding" scroll="true">
+        <h2 id="login-heading1" style="color:#000000;font-weight:400;text-align:center;" class=" ">App Login</h2>
+        <form id="login-form1" class="list ">
+
+          <h5 id="login-heading1" style="color:#F6390C;font-weight:400;text-align:center;" class=" ">{{dataFromService.data.message}}</h5>
+
+            <ion-list id="login-list1" class=" ">
+                <label class="item item-input " id="login-input1">
+                    <span class="input-label">Username</span>
+                    <input ng-model="userId" type="text" placeholder="">
+                </label>
+                <label class="item item-input " id="login-input2">
+                    <span class="input-label">Password</span>
+                    <input ng-model="password" type="password" placeholder="">
+                </label>
+            </ion-list>
+            <div class="spacer" style="height: 40px;"></div>
+             <a id="login-button1" ng-click="click()" style="color:#434D43;" class=" button button-balanced  button-block ">Log in</a>
+             <!-- <a ui-sref="menu.aboutPSD22" id="login-button1" ng-click="click()" style="color:#434D43;" class=" button button-balanced  button-block ">Log in</a> -->
+            <a ui-sref="signup" id="login-button2" class=" button button-positive  button-block button-clear ">Or create an account</a>
+
+
+      {{loginSuccessful}}
+            {{defaults.headers.common.Authorization}}
+            {{authTokenForLogin}}
+            {{dataFromService}}
+            {{dataFromService.status}} 
+
+
+        </form>
+    </ion-content>
+</ion-view>

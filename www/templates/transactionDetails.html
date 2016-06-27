@@ -1,0 +1,42 @@
+<ion-view title="Transaction Details" id="page9" class=" ">
+    <ion-content padding="true" class="has-header">
+      <form id="login-form1" class="list ">
+         <!--  <div class="spacer" style="height: 40px;"></div>
+           <p id="transactionDetails-markdown2" style="color:#000000;" class=" " ng-repeat="x in transactionDetails">
+                <strong>{{x.id}}</strong>
+          </p> -->
+          <!-- <ion-list id="transactionDetails-list1" class=" " ng-repeat="x in transactionDetails">
+                <label class="item item-input " id="login-input1">
+                    <span class="input-label">{{x.body.value.amount}} {{x.body.value.currency}} </span>
+                </label>
+                <label class="item item-input " id="login-input2">
+                    <span class="input-label">{{x.type}}</span>
+                </label>
+                <label class="item item-input " id="login-input2">
+                    <span class="input-label">{{x.status}}</span>
+                </label>
+                <div class="spacer" style="height: 40px;"></div>
+            </ion-list> -->
+
+                <nvd3 options="options" data="data"></nvd3>
+            
+             <ion-list>
+            <div ng-repeat="group in groups">
+              <ion-item class="item-stable"
+                        ng-click="toggleGroup(group)"
+                        ng-class="{active: isGroupShown(group)}">
+                  <i class="icon" ng-class="isGroupShown(group) ? 'ion-minus' : 'ion-plus'"></i>
+                &nbsp;
+                Transaction of: {{group.name}} {{highlightChallenge}}
+              </ion-item>
+              <ion-item class="item-accordion"
+                        ng-repeat="item in group.items"
+                        ng-show="isGroupShown(group)">
+                {{item}}
+              </ion-item>
+            </div> 
+            </ion-list> 
+
+      </form>
+    </ion-content>
+</ion-view>

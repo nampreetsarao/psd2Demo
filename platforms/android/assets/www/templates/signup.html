@@ -1,0 +1,45 @@
+<ion-view title="Signup" hide-nav-bar="true" id="page5" style="background-color:#;" class=" ">
+    <ion-content padding="true" class="manual-ios-statusbar-padding" scroll="true">
+        <h2 id="signup-heading2" style="color:#000000;font-weight:400;text-align:center;" class=" ">Sign-up</h2>
+        <form id="myForm" name="myForm" class="list " novalidate="">
+          <h5 id="signup-heading1" style="color:#F6390C;font-weight:400;text-align:center;" class=" ">{{signupResponse.data.errMsg}}</h5>
+          <div class="padding">
+
+           <p ng-show="myForm.firstName.$error.required">* First Name is required</p>
+           <p ng-show="myForm.lastName.$error.required">* Last Name is required</p>
+           <p ng-show="myForm.phoneNumber.$error.required">* Phone number is required</p>
+           <p ng-show="myForm.phoneNumber.$error.minlength">* Phone number must be longer than 10 characters</p>
+           <p ng-show="myForm.userId.$invalid && !myForm.userId.$pristine">* Not a valid email address</p>
+           <p ng-show="myForm.userId.$error.minlength">* Username must be longer than 5 characters</p>
+           <p ng-show="myForm.password.$error.required">* Password is required</p>
+           <p ng-show="myForm.password.$error.minlength">* Password must be longer than 6 characters</p>
+         </div>
+            <ion-list id="signup-list2" class=" ">
+                <label class="item item-input " id="signup-input3">
+                    <span class="input-label">First Name</span>
+                    <input type="text" name="firstName" ng-model="firstName" placeholder="">
+                </label>
+                <label class="item item-input " id="signup-input32">
+                    <span class="input-label">Last Name</span>
+                    <input type="text" name="lastName" ng-model="lastName" placeholder="" required>
+                </label>
+                <label class="item item-input " id="signup-input4">
+                    <span class="input-label">Mobile</span>
+                    <input type="number" name="phoneNumber" minlength="10" ng-model="phoneNumber"  placeholder="" required>
+                </label>
+                <label class="item item-input " id="signup-input4">
+                    <span class="input-label">Username</span>
+                    <input type="email" name="userId" ng-model="userId"  placeholder="" required minlength="5">
+                </label>
+                <label class="item item-input " id="signup-input5">
+                    <span class="input-label">Password</span>
+                    <input ng-model="password" name="password" minlength="6" type="password" placeholder="" >
+                </label>
+
+            </ion-list>
+            <button id="signup-button3" ng-disabled="myForm.$invalid" ng-click="signUpUser()"class=" button button-positive  button-block ">Sign up</button>
+        </form>
+
+
+    </ion-content>
+</ion-view>

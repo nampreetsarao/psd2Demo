@@ -1,0 +1,16 @@
+<ion-view style="" class=" " id="page6" title="Profile" hide-back-button="true">
+    <ion-content class="has-header" padding="true">
+        <ion-list class=" " id="profile-list4">
+            <ion-item style="" id="profile-list-item9" class="item-icon-left">
+                <i class="icon ion-happy-outline"></i>
+                 {{userProfile[0].data.response.firstName}}  {{userProfile[0].data.response.lastName}}
+            </ion-item>
+            <ion-item style="" id="profile-list-item10" class="item-icon-left ">
+                <i class="icon ion-iphone"></i>{{userProfile[0].data.response.phone}}</ion-item>
+            <ion-item style="" id="profile-list-item11" class="item-icon-left  ">
+                <i class="icon ion-email"></i>{{userProfile[0].data.response.email}}</ion-item>
+            <ion-item style="" id="profile-list-item12" class="item-icon-left  ">
+                <i class="icon ion-ionic"></i>Role: {{userProfile[0].data.response.role}} </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>

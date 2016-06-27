@@ -1,0 +1,19 @@
+<ion-view title="Accounts" id="showAllAccounts" class=" ">
+  <ion-content padding="true" class="has-header">
+
+
+    <ion-list>
+      <ion-item ng-repeat="x in allAccountDetails.data">
+        {{x.label}}: {{x.bank_id}}, {{x.id}}
+      </ion-item>
+      <ion-item href="#/side-menu21/page1">
+        View Details...
+      </ion-item>
+    </ion-list>
+
+    <!-- <p id="aboutPSD22-markdown2" style="color:#000000;" class=" " ng-repeat="x in allAccountDetails.data" ng-onclick="accountSelected(x.id)">
+    <strong>{{x.id}}</strong>
+  </p> -->
+
+</ion-content>
+</ion-view>

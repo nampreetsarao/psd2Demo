@@ -1,0 +1,37 @@
+<ion-view title="Make a Payment" id="makeAPayment" style="background-color:#;" class=" ">
+    <ion-content padding="true" class="has-header">
+        <form id="makeAPayment-form5" class="list ">
+            <label class="item item-input " id="makeAPayment-input9">
+                <span class="input-label">From Account</span>
+                <input type="text" placeholder="" ng-model="makePaymentObj.from.account_id">
+            </label>
+            <label class="item item-input " id="makeAPayment-input10">
+                <span class="input-label">To Account</span>
+                <input type="text" placeholder="" ng-model="makePaymentObj.to.account_id">
+            </label>
+            <label class="item item-input " id="makeAPayment-input10">
+                <span class="input-label">Amount</span>
+                <input type="text" placeholder="" ng-model="makePaymentObj.value.amount">
+            </label>
+            <label class="item item-input " id="makeAPayment-input10">
+                <span class="input-label">Description</span>
+                <input type="text" placeholder="" ng-model="makePaymentObj.description">
+            </label>
+            <label class="item item-select " id="makeAPayment-select1">
+                <span class="input-label">Transfer Type</span>
+                <!--select>
+                    <option>Within the Bank</option>
+                    <option>Inter-Bank</option>
+                </select-->
+                <select ng-model="makePaymentObj.type">
+                    <option ng-repeat="type in transactionTypes"
+                            value="{{type.value}}">
+                      {{type.value}}
+                    </option>
+                </select>
+            </label>
+        </form>
+        <div class="spacer" style="width: 300px; height: 32px;"></div>
+        <button id="makeAPayment-button4" class=" button button-positive  button-block " ng-click="paymentSubmit()">Submit Transaction</button>
+    </ion-content>
+</ion-view>

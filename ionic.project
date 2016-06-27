@@ -1,0 +1,10 @@
+{
+  "name": "psd2",
+  "app_id": "557832ed",
+  "proxies": [
+    {
+    "path": "/account",
+    "proxyUrl": "http://169.44.112.56::8082/psd2api/banks/BARCGB/accounts/5437/owner"
+    }
+  ]
+}
