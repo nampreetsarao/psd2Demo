@@ -18,6 +18,15 @@ angular.module('app.routes', ['app.controllers'])
     }
     })
 
+     .state('menu.credits', {
+  url: '/credits',
+  views: {
+  'side-menu21': {
+    templateUrl: 'templates/credits.html'
+  }
+  }
+  })
+
       .state('menu.profile', {
     url: '/page6',
     views: {
@@ -29,7 +38,7 @@ angular.module('app.routes', ['app.controllers'])
     })
 
       .state('menu.aboutPSD2', {
-    url: '/page1',
+    url: '/accountDetails',
     views: {
       'side-menu21': {
         templateUrl: 'templates/aboutPSD2.html',

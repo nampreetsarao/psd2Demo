@@ -31,36 +31,41 @@ angular.module('app.controllers', [])
   $ionicLoading.show(); 
   $scope.allAccountDetails=[];
   $scope.oauthData = StorageServiceForToken.getAll();
-  if($scope.oauthData!=null){
+  if($scope.oauthData!=null && $scope.oauthData.length>0){
       $scope.authorizationToken = 'Bearer '+ $scope.oauthData[0].access_token;
       //$resource.authorizationToken = $scope.authorizationToken ;
   }else{
     $scope.allAccountDetails='First authenticate and then make this call.';
   }
   $http.defaults.headers.common.Authorization=$scope.authorizationToken;
+  //$http.defaults.headers.common.Authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwNDE1NTksInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiM2MyNTk3OWYtMmVkNS00YTdjLTgzNjYtNTYyMzI2NzQ0ZGQ4IiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.sv9YjcD1bbjR42enR-B9QQ040x5oO0Y7TKpQyIJu88o';
   $http.get('http://169.44.112.56:8082/psd2api/my/banks/BARCGB/accounts').then(function(resp){
   		console.log('Success', resp); // JSON object
       $scope.allAccountDetails=resp;
       $ionicLoading.hide(); 
   	}, function(err){
   		console.error('ERR', err);
+      $ionicLoading.hide();
       var alertPopup = $ionicPopup.alert({
         title: 'Show all accounts: Alert',
         template:'Error occured while calling the API:'+err
       });
   	});
 
-
+    $scope.moveToDetails = function(){
+      $state.go('menu.aboutPSD2');
+      
+    };
 
   })
 
 
 .controller('aboutPSD2Ctrl', function($scope,StorageServiceForToken,$http,AccountDetails,$resource,$ionicPopup,$ionicLoading) {
-  ionicLoading.show();
+  $ionicLoading.show();
   $scope.accountDetails=[];
 
   $scope.oauthData = StorageServiceForToken.getAll();
-  if($scope.oauthData!=null){
+  if($scope.oauthData!=null && $scope.oauthData.length>0){
       $scope.authorizationToken = 'Bearer '+ $scope.oauthData[0].access_token;
       //$resource.authorizationToken = $scope.authorizationToken ;
   }else{
@@ -70,7 +75,7 @@ angular.module('app.controllers', [])
   $http.get('http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/account').then(function(resp){
   		console.log('Success', resp); // JSON object
       $scope.accountDetails=resp;
-      ionicLoading.hide();
+      $ionicLoading.hide();
   	}, function(err){
   		console.error('ERR', err);
       $ionicLoading.hide();
