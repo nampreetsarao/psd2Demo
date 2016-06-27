@@ -18,9 +18,9 @@
                 <ion-item id="menu-list-item3" ui-sref="menu.aboutPSD22" menu-close="" class="  ">About PSD2</ion-item>
                 <ion-item id="menu-list-item2" ui-sref="menu.exploreAPI" menu-close="" class="  ">Authorize App</ion-item>
                 <!-- <ion-item id="menu-list-item1" ui-sref="menu.aboutPSD2" menu-close="" class="  ">Accounts Details</ion-item> -->
-                <ion-item id="menu-list-item1" ui-sref="menu.showAllAccounts" menu-close="" class="  ">Show All Accounts</ion-item>
-                <ion-item id="menu-list-item1" ui-sref="menu.makeAPayment" menu-close="" class="  ">Make a Payment</ion-item>
-                <ion-item id="menu-list-item1" ui-sref="menu.transactionDetails" menu-close="" class="  ">Transaction Details</ion-item>
+                <ion-item id="menu-list-item1" ui-sref="menu.showAllAccounts" menu-close="" class="  " ng-if="enableSubMenu">Show All Accounts</ion-item>
+                <ion-item id="menu-list-item1" ui-sref="menu.makeAPayment" menu-close="" class="  " ng-if="enableSubMenu">Make a Payment</ion-item>
+                <ion-item id="menu-list-item1" ui-sref="menu.transactionDetails" menu-close="" class="  " ng-if="enableSubMenu">Transaction Details</ion-item>
                 <!-- <ion-content padding="true" class="side-menu-left has-header">
                   <ion-list id="menu-child" class=" ">
                     <ion-item id="menu.exploreAPI" ui-sref="menu.profile" menu-close="" class="  ">child of Explore API</ion-item>

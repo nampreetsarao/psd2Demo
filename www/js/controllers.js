@@ -1,5 +1,17 @@
 angular.module('app.controllers', [])
 
+
+.controller('MenuCtrl', function($scope, $rootScope, $ionicModal, $timeout) {  
+
+    $scope.enableSubMenu = false;
+
+    $scope.$on('enableMenus', function(event) {
+        $scope.enableSubMenu = true;
+    });
+
+  })
+
+
 .controller('LoadingCtrl', function($scope, $ionicLoading) {
   $scope.show = function() {
     $ionicLoading.show({
@@ -94,7 +106,7 @@ angular.module('app.controllers', [])
                //Persisting the token data in local storage
                StorageServiceForToken.remove($scope.oauthData);
                StorageServiceForToken.add($scope.oauthData) ;
-               $state.go('menu.showAllAccounts');
+               $state.go('menu.subscription');
             });
        };
      });
@@ -142,10 +154,7 @@ angular.module('app.controllers', [])
   })
 
 
-  .controller('transactionDetailsCtrl', function($scope,StorageService,$http,StorageServiceForToken,$ionicLoading) {
-    
-
-
+  .controller('transactionDetailsCtrl', function($scope,StorageService,$http,StorageServiceForToken,$ionicLoading,$ionicPopup) {
 
       $ionicLoading.show(); 
       /*
@@ -171,7 +180,7 @@ angular.module('app.controllers', [])
        }
 
     $http.defaults.headers.common.Authorization=$scope.authorizationToken;
-    //$http.defaults.headers.common.Authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMTYwMTYsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiZjAxMjBiOTItMmQzNS00NTU1LWFjODctY2M3MjhkZmNhMmZiIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.nJHwJO6FQVqCX26czQQu2bYYk8TpXq1sWYTFk0LEaHc';
+    //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMzcyMzksInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiMmNmMGJjNDYtZjE3MS00MzJmLWFmNWItMDJiOTY3ZGI2NzQ0IiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.AqAnlRx_3KKfBm4DT0KU4NVeErSmtJC0wFNkaNE-geM";
     var interBankCount=0;
     var internationBankCount=0;
     var withInBankCount=0;        
@@ -182,23 +191,39 @@ angular.module('app.controllers', [])
           $scope.groups = [];
           for (var i=0; i<$scope.transactionDetails.length; i++) {
               
-              var highlightChallenge="";
+              var  highlightChallenge="";
+              var challengeValue=false;
               if($scope.transactionDetails[i].challenge !== undefined){
+                  //$scope.groups[i].challenge.push("isChallenge","true");
                   highlightChallenge="*";
+                  challengeValue=true;
+
               }
+
 
               $scope.groups[i] = {
                 name:$scope.transactionDetails[i].body.value.amount + " "+$scope.transactionDetails[i].body.value.currency +" " +highlightChallenge,
-                items: []
+                items: [],
+                challenge: challengeValue,
+                challengeId: [],
+                challengeType: [],
+                transactionId: []
+
               };
             
                $scope.groups[i].items.push("To Account: "+$scope.transactionDetails[i].body.to.account_id); 
                $scope.groups[i].items.push("Payment Status: "+$scope.transactionDetails[i].status);
-               $scope.groups[i].items.push("Transaction Id: "+$scope.transactionDetails[i].transaction_ids);
+               $scope.groups[i].items.push("Transaction Id: "+$scope.transactionDetails[i].id);
                
                if($scope.transactionDetails[i].challenge !== undefined){
+
                   $scope.groups[i].items.push("Transaction has been challenged ");
+                  $scope.groups[i].items.push("Challenge Id: "+$scope.transactionDetails[i].challenge.id);
                   $scope.groups[i].items.push("Challenge Type: "+$scope.transactionDetails[i].challenge.challenge_type);
+
+                  $scope.groups[i].challengeId.push($scope.transactionDetails[i].challenge.id);
+                  $scope.groups[i].challengeType.push($scope.transactionDetails[i].challenge.challenge_type);
+                  $scope.groups[i].transactionId.push($scope.transactionDetails[i].id);
                }
 
                if($scope.transactionDetails[i].type=='WITHIN_BANK'){
@@ -214,7 +239,8 @@ angular.module('app.controllers', [])
                if ($scope.transactionDetails[i].type=='INTERNATIONAL'){
                 internationBankCount++;
                }
-               
+
+
             }  
 
             $scope.options = {  
@@ -239,15 +265,15 @@ angular.module('app.controllers', [])
                   };
                   $scope.data = [  
                     {
-                      key: "International Transfers",
+                      key: "International",
                       y: internationBankCount
                     },
                     {
-                      key: "Within-Bank Transfers",
+                      key: "Within-Bank",
                       y: withInBankCount
                     },
                     {
-                      key: "Inter-Bank Transfers",
+                      key: "Inter-Bank",
                       y: interBankCount
                     }
                   ];
@@ -260,13 +286,56 @@ angular.module('app.controllers', [])
       });
 
 
+     $scope.answerChallenge = function( challengeId,challengeType,transactionId){
+                $scope.challengeId= challengeId;
+                $scope.challengeType=challengeType;
+                $scope.transactionId=transactionId;
+                $http.defaults.headers.common.Authorization=$scope.authorizationToken;
+                $scope.data = {};
+                // An elaborate, custom popup
+                var myPopup = $ionicPopup.show({
+                  template: '<input type="text" ng-model="data.wifi">',
+                  title: 'Enter Challenge Answer',
+                  subTitle: 'You need to answer the challenge',
+                  scope: $scope,
+                  buttons: [
+                    { text: 'Cancel' },
+                    {
+                      text: '<b>Submit</b>',
+                      type: 'button-positive',
+                      onTap: function(e) {
+                        if (!$scope.data.wifi) {
+                          //don't allow the user to close unless he enters wifi password
+                          e.preventDefault();
+                        } else {
+                          return $scope.data.wifi;
+                        }
+                      }
+                    }
+                  ]
+                });
+
+                myPopup.then(function(res) {
+                  $http.defaults.headers.common.Authorization=$scope.authorizationToken;
+                  //$http.defaults.headers.common.Authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMzIyNzIsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiYjExYTY4ZTgtM2Y0Mi00ZGNlLWEwZDctZDY3NjMyYTg3ZDkxIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.r54m9YuW3X-G8hLXQI0kMJXNifuwtdCh87bhWUuHD80';
+                  //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMzcyMzksInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiMmNmMGJjNDYtZjE3MS00MzJmLWFmNWItMDJiOTY3ZGI2NzQ0IiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.AqAnlRx_3KKfBm4DT0KU4NVeErSmtJC0wFNkaNE-geM";
+                  $scope.challengeObject= {  "id":$scope.challengeId,  "answer":res};
+                
+                  $http.post('http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-request-types/'+$scope.challengeType+'/transaction-requests/'+$scope.transactionId+'/challenge',$scope.challengeObject).then(function(resp){
+                      console.log('Challenge Accepted successfully', resp); // JSON object
+                      
+                    }, function(err){
+                      console.error('ERR', err);
+                    });
 
 
+                  console.log('Tapped!', res);
+                });
 
-
-
-      
-
+                // $timeout(function() {
+                //    myPopup.close(); //close the popup after 3 seconds for some reason
+                // }, 3000);
+     }
   })
 
 
@@ -297,7 +366,7 @@ angular.module('app.controllers', [])
         }else{
           $scope.accountDetails='First authenticate and then make this call.';
         }
-        //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMTYwMTYsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiZjAxMjBiOTItMmQzNS00NTU1LWFjODctY2M3MjhkZmNhMmZiIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.nJHwJO6FQVqCX26czQQu2bYYk8TpXq1sWYTFk0LEaHc";
+        //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMjcwNDIsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiY2JkMDM4NDktNGRjNC00NDEyLWE0MzMtNjlhOGUyMTRkZmEyIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.bW2F9p4ABmGcTSwNmZn-wZinPmprX2alvhp_VhqSpr0";
         $http.defaults.headers.common.Authorization=$scope.authorizationToken;
         $ionicLoading.show();
       $http.get('http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-request-types').then(function(resp){
@@ -320,8 +389,8 @@ angular.module('app.controllers', [])
         }
 
         $http.defaults.headers.common.Authorization=$scope.authorizationToken;  
-        //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMTYwMTYsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiZjAxMjBiOTItMmQzNS00NTU1LWFjODctY2M3MjhkZmNhMmZiIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.nJHwJO6FQVqCX26czQQu2bYYk8TpXq1sWYTFk0LEaHc";
-         $http.post("http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-request-types/INTER_BANK/transaction-requests", $scope.makePaymentObj, {
+        //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMjcwNDIsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiY2JkMDM4NDktNGRjNC00NDEyLWE0MzMtNjlhOGUyMTRkZmEyIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.bW2F9p4ABmGcTSwNmZn-wZinPmprX2alvhp_VhqSpr0";
+         $http.post("http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-request-types/"+$scope.makePaymentObj.type+"/transaction-requests", $scope.makePaymentObj, {
             
         }).success(function(responseData) {
             //do stuff with response
@@ -380,6 +449,63 @@ angular.module('app.controllers', [])
       //     }
       //   });
       }
+    })
+
+
+    .controller('subscriptionCtrl', function($scope,$http, $ionicLoading, StorageServiceForToken, $state,$rootScope) {
+       $scope.subscribeObj = {
+            "username" : "",
+            "accountId" : "",
+            "bank_id" : "BARCGB",
+            "viewIds": [{"id":"owner"}],
+            "clientId": "postman",
+            "limits": [{
+                    "transaction_request_type": { "value" : "WITHIN_BANK"},
+                    "amount": { "currency" : "GBP", "amount" : 100.01}
+                },
+                {
+                    "transaction_request_type": { "value" : "INTER_BANK"},
+                    "amount": { "currency" : "GBP", "amount" : 50.01}
+                },
+                {
+                    "transaction_request_type": { "value" : "INTERNATIONAL"},
+                    "amount": { "currency" : "GBP", "amount" : 25.01}
+                }
+                ],
+            "transaction_request_types": [{"value": "WITHIN_BANK"}, {"value": "INTER_BANK"}, {"value": "INTERNATIONAL"}]
+        };
+
+
+        $scope.subscribe = function(){
+          $ionicLoading.show();
+          console.log($scope.subscribeObj);
+          $scope.oauthData = StorageServiceForToken.getAll();
+          if($scope.oauthData!=null && $scope.oauthData.length>0){
+              $scope.authorizationToken = 'Bearer '+ $scope.oauthData[0].access_token;
+          }else{
+            $scope.accountDetails='First authenticate and then make this call.';
+          }
+
+          $http.defaults.headers.common.Authorization=$scope.authorizationToken;  
+          //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMzcyMzksInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiMmNmMGJjNDYtZjE3MS00MzJmLWFmNWItMDJiOTY3ZGI2NzQ0IiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.AqAnlRx_3KKfBm4DT0KU4NVeErSmtJC0wFNkaNE-geM";
+          $http.post("http://169.44.112.56:8082/psd2api/subscription/request", $scope.subscribeObj, {
+              
+          }).success(function(responseData) {
+              //do stuff with response
+              $ionicLoading.hide();
+              console.log('Success', responseData);
+              $rootScope.$broadcast('enableMenus');
+              $ionicLoading.hide();      
+              $state.go('menu.aboutPSD22');   
+                   
+          }).error(function(data, status) {
+            console.error('Repos error', status, data);
+            $scope.dataFromService=data;
+            $ionicLoading.hide();
+          });
+
+        };
+
     })
 
     .controller('signupCtrl', function($scope, CreateBankUser, SignUpService,$state,$ionicPopup, CreateClientForOAuth, $ionicLoading ) {

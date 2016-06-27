@@ -1,0 +1,18 @@
+<ion-view title="Subscription" id="subscription" style="background-color:#;" class=" ">
+    <ion-content padding="true" class="has-header">
+        <form id="subscribe-form5" class="list ">
+            <label class="item item-input " id="subscribe-input9">
+                <span class="input-label">Account ID</span>
+                <input type="number" placeholder="" ng-model="subscribeObj.accountId">
+            </label>
+            <label class="item item-input " id="subscribe-input10">
+                <span class="input-label">Username</span>
+                <input type="text" placeholder="" ng-model="subscribeObj.username">
+            </label>
+        </form>
+        <div class="spacer" style="width: 300px; height: 32px;"></div>
+        <button id="sub-button4" class=" button button-positive  button-block " ng-click="subscribe()">Subscribe</button>
+       <!--  {{dataFromService}}
+            {{dataFromService.status}}  -->
+    </ion-content>
+</ion-view>

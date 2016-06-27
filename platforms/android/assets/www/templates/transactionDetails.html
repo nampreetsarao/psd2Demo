@@ -1,4 +1,4 @@
-<ion-view title="Transaction Details" id="page9" class=" ">
+<ion-view title="Payment Request Details" id="page9" class=" " cache-view="false">
     <ion-content padding="true" class="has-header">
       <form id="login-form1" class="list ">
          <!--  <div class="spacer" style="height: 40px;"></div>
@@ -29,11 +29,17 @@
                 &nbsp;
                 Transaction of: {{group.name}} {{highlightChallenge}}
               </ion-item>
+
               <ion-item class="item-accordion"
                         ng-repeat="item in group.items"
                         ng-show="isGroupShown(group)">
                 {{item}}
+               </ion-item> 
+
+              <ion-item class="item-accordion" ng-show="isGroupShown(group)">
+               <button id="makeAPayment-button4" class=" button button-positive  button-block " ng-click="answerChallenge('{{group.challengeId[0]}}', '{{group.challengeType[0]}}','{{group.transactionId[0]}}')" ng-if="group.challenge">Answer Challenge</button> 
               </ion-item>
+
             </div> 
             </ion-list> 
 

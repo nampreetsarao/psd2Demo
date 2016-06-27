@@ -1,4 +1,4 @@
-angular.module('app.routes', [])
+angular.module('app.routes', ['app.controllers'])
 
 .config(function($stateProvider, $urlRouterProvider) {
 
@@ -58,11 +58,18 @@ angular.module('app.routes', [])
     }
   })
 
-  .state('menu', {
-    url: '/side-menu21',
-    templateUrl: 'templates/menu.html',
-    abstract:true
-  })
+   .state('menu', {
+      url: '/side-menu21',
+      templateUrl: 'templates/menu.html',
+      abstract:true,
+      controller: 'MenuCtrl'
+    })
+
+  // .state('menu', {
+  //   url: '/side-menu21',
+  //   templateUrl: 'templates/menu.html',
+  //   abstract:true
+  // })
 
   .state('login', {
     url: '/login',
@@ -93,6 +100,16 @@ angular.module('app.routes', [])
   'side-menu21': {
     templateUrl: 'templates/makeAPayment.html',
     controller: 'makeAPaymentCtrl'
+  }
+  }
+  })
+
+   .state('menu.subscription', {
+  url: '/subscription',
+  views: {
+  'side-menu21': {
+    templateUrl: 'templates/subscription.html',
+    controller: 'subscriptionCtrl'
   }
   }
   })
