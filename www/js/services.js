@@ -352,11 +352,11 @@ angular.module('app.services', ['ngResource','app-constants'])
 
     var _add = function (thing) {
       $localStorage.profileInformation.push(thing);
-    }
+    };
 
     var _remove = function (thing) {
       $localStorage.profileInformation.splice($localStorage.profileInformation.indexOf(thing), 1);
-    }
+    };
 
     return {
         getAll: _getAll,
@@ -379,11 +379,11 @@ angular.module('app.services', ['ngResource','app-constants'])
 
     var _add = function (thing) {
       $localStorage.tokenInformation.push(thing);
-    }
+    };
 
     var _remove = function (thing) {
       $localStorage.tokenInformation.splice($localStorage.tokenInformation.indexOf(thing), 1);
-    }
+    };
 
     return {
         getAll: _getAll,

@@ -1,14 +1,14 @@
 angular.module('app.controllers', [])
 
 
-.controller('MenuCtrl', function($scope, $rootScope, $ionicModal, $timeout, StorageService, StorageServiceForToken) {  
+.controller('MenuCtrl', function($scope, $rootScope, $ionicModal, $timeout) {  
     $scope.enableSubMenu = false;
     $scope.$on('enableMenus', function(event) {
         $scope.enableSubMenu = true;
     });
 
     $scope.logout =  function(){
-       StorageService.removeAll() ;
+       //StorageService.removeAll() ;
       // StorageServiceForToken.removeAll();
 
     }    
