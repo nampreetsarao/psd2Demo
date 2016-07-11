@@ -2,6 +2,10 @@ angular.module('app.routes', ['app.controllers'])
 
 .config(function($stateProvider, $urlRouterProvider) {
 
+
+    //psdConfigurationsProvider.setURL("169.44.112.56","8084");
+   // psdConfigurationsProvider.setAccNo("8899");
+
   // Ionic uses AngularUI Router which uses the concept of states
   // Learn more here: https://github.com/angular-ui/ui-router
   // Set up the various states which the app can be in.

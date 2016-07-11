@@ -1,16 +1,18 @@
 angular.module('app.controllers', [])
 
 
-.controller('MenuCtrl', function($scope, $rootScope, $ionicModal, $timeout) {  
-
+.controller('MenuCtrl', function($scope, $rootScope, $ionicModal, $timeout, StorageService, StorageServiceForToken) {  
     $scope.enableSubMenu = false;
-
     $scope.$on('enableMenus', function(event) {
         $scope.enableSubMenu = true;
     });
 
-  })
+    $scope.logout =  function(){
+       StorageService.removeAll() ;
+      // StorageServiceForToken.removeAll();
 
+    }    
+  })
 
 .controller('LoadingCtrl', function($scope, $ionicLoading) {
   $scope.show = function() {
@@ -27,68 +29,29 @@ angular.module('app.controllers', [])
   };
 })
 
-.controller('showAllAccountCtrl', function($scope,StorageServiceForToken,$state,$http,AccountDetails,$resource,$ionicPopup,$ionicLoading) {
-  $ionicLoading.show(); 
-  $scope.allAccountDetails=[];
-  $scope.oauthData = StorageServiceForToken.getAll();
-  if($scope.oauthData!=null && $scope.oauthData.length>0){
-      $scope.authorizationToken = 'Bearer '+ $scope.oauthData[0].access_token;
-      //$resource.authorizationToken = $scope.authorizationToken ;
-  }else{
-    $scope.allAccountDetails='First authenticate and then make this call.';
-  }
-  $http.defaults.headers.common.Authorization=$scope.authorizationToken;
-  //$http.defaults.headers.common.Authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwNDE1NTksInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiM2MyNTk3OWYtMmVkNS00YTdjLTgzNjYtNTYyMzI2NzQ0ZGQ4IiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.sv9YjcD1bbjR42enR-B9QQ040x5oO0Y7TKpQyIJu88o';
-  $http.get('http://169.44.112.56:8082/psd2api/my/banks/BARCGB/accounts').then(function(resp){
-  		console.log('Success', resp); // JSON object
-      $scope.allAccountDetails=resp;
-      $ionicLoading.hide(); 
-  	}, function(err){
-  		console.error('ERR', err);
-      $ionicLoading.hide();
-      var alertPopup = $ionicPopup.alert({
-        title: 'Show all accounts: Alert',
-        template:'Error occured while calling the API:'+err
+.controller('showAllAccountCtrl', function($scope,accountsService,StorageServiceForToken,$state,$http,AccountDetails,$resource,$ionicPopup,$ionicLoading) {
+    
+    var promise = accountsService.getAccounts();
+      promise.then(function(data) {
+          $scope.allAccountDetails = data;
       });
-  	});
 
     $scope.moveToDetails = function(){
-      $state.go('menu.aboutPSD2');
-      
+      $state.go('menu.aboutPSD2');      
     };
-
   })
 
 
-.controller('aboutPSD2Ctrl', function($scope,StorageServiceForToken,$http,AccountDetails,$resource,$ionicPopup,$ionicLoading) {
-  $ionicLoading.show();
-  $scope.accountDetails=[];
-
-  $scope.oauthData = StorageServiceForToken.getAll();
-  if($scope.oauthData!=null && $scope.oauthData.length>0){
-      $scope.authorizationToken = 'Bearer '+ $scope.oauthData[0].access_token;
-      //$resource.authorizationToken = $scope.authorizationToken ;
-  }else{
-    $scope.accountDetails='First authenticate and then make this call.';
-  }
-  $http.defaults.headers.common.Authorization=$scope.authorizationToken;
-  $http.get('http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/account').then(function(resp){
-  		console.log('Success', resp); // JSON object
-      $scope.accountDetails=resp;
-      $ionicLoading.hide();
-  	}, function(err){
-  		console.error('ERR', err);
-      $ionicLoading.hide();
-      var alertPopup = $ionicPopup.alert({
-        title: 'Alert',
-        template:'Did you authorize the app to access bank information? Error occured while calling the API:'+err.data.error+ ".More: "+err.statusText
+.controller('aboutPSD2Ctrl', function($scope,aboutService,StorageServiceForToken,$http,AccountDetails,$resource,$ionicPopup,$ionicLoading) {
+  
+  var promise = aboutService.getAccountDetails();
+  promise.then(function(data) {
+          $scope.accountDetails = data;
       });
-  	})
-
-  })
+})
 
 //OAuth implementation
-.controller('exploreAPICtrl', function($scope, OAuthService,$http, $state,$interval, $cordovaInAppBrowser,StorageServiceForToken) {
+.controller('exploreAPICtrl', function($scope, OAuthService,$http, $state,$interval, $cordovaInAppBrowser,StorageServiceForToken, subscribeService) {
     $scope.apiClick =  function(){
     var ref = cordova.InAppBrowser.open('http://169.44.112.56:8081/oauth2server/oauth/authorize?client_id=postman&redirect_uri=http://localhost/callback&scope=write&response_type=code', '_blank', 'location=no,clearsessioncache=yes,clearcache=yes,toolbar=yes');
     ref.addEventListener('loadstart', function(event) {
@@ -97,21 +60,38 @@ angular.module('app.controllers', [])
           $scope.oAuth=[];
          //Fetch general Information details from the API
          OAuthService.general(
-           {
-             grant_type: 'authorization_code',
-             redirect_uri: 'http://localhost/callback',
-             state: '4281938',
-            code:  $scope.requestToken},
+             {
+               grant_type: 'authorization_code',
+               redirect_uri: 'http://localhost/callback',
+               state: '4281938',
+              code:  $scope.requestToken
+            },
             {
 
             },
             function(message) {
                $scope.oauthData=message;
                ref.close();
+               //alert("done.."+$scope.oauthData);
                //Persisting the token data in local storage
                StorageServiceForToken.remove($scope.oauthData);
                StorageServiceForToken.add($scope.oauthData) ;
-               $state.go('menu.subscription');
+
+               //check subscription
+               var subscriptionDetails = {};
+               var promise = subscribeService.getSubscriptionInfo();
+                promise.then(function(resp) {
+                    subscriptionDetails = resp.data;
+                    if(subscriptionDetails.length && subscriptionDetails.length>0){
+                        var accountID = subscriptionDetails[0].accountId;
+                        localStorage.setItem("accountID", accountID);
+                        //alert('GetAccountId: '+localStorage.getItem("accountID"));
+                        //$state.go('menu.aboutPSD22');
+                    }
+                    else{
+                        $state.go('menu.subscription');
+                    }
+                });               
             });
        };
      });
@@ -159,7 +139,7 @@ angular.module('app.controllers', [])
   })
 
 
-  .controller('transactionDetailsCtrl', function($scope,StorageService,$http,StorageServiceForToken,$ionicLoading,$ionicPopup) {
+  .controller('transactionDetailsCtrl', function($scope,transactionService,StorageService,$http,StorageServiceForToken,$ionicLoading,$ionicPopup) {
 
       $ionicLoading.show(); 
       /*
@@ -177,174 +157,142 @@ angular.module('app.controllers', [])
         return $scope.shownGroup === group;
       };
       
-      $scope.oauthData = StorageServiceForToken.getAll();
-      if($scope.oauthData!=null && $scope.oauthData.length>0){
-             $scope.authorizationToken = 'Bearer '+ $scope.oauthData[0].access_token;
-       }else{
-            $scope.transactionDetails='First authenticate and then make this call.';
-       }
-
-    $http.defaults.headers.common.Authorization=$scope.authorizationToken;
-    //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMzcyMzksInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiMmNmMGJjNDYtZjE3MS00MzJmLWFmNWItMDJiOTY3ZGI2NzQ0IiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.AqAnlRx_3KKfBm4DT0KU4NVeErSmtJC0wFNkaNE-geM";
+      
     var interBankCount=0;
     var internationBankCount=0;
-    var withInBankCount=0;        
-     $http.get('http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-requests').then(function(resp){
-          $ionicLoading.hide();
-          console.log('Success', resp);
+    var withInBankCount=0;
+    $scope.transactionDetails = transactionService.getTransactionDetails();   
+
+    var promise = transactionService.getTransactionDetails();
+      promise.then(function(resp) {
           $scope.transactionDetails = resp.data;
+          if($scope.transactionDetails.length>0){
           $scope.groups = [];
           for (var i=0; i<$scope.transactionDetails.length; i++) {
+                  
+            var  highlightChallenge="";
+            var challengeValue=false;
+            if($scope.transactionDetails[i].challenge !== undefined){
+                highlightChallenge="*";
+                challengeValue=true;
+            }
+
+            $scope.groups[i] = {
+              name:$scope.transactionDetails[i].body.value.amount + " "+$scope.transactionDetails[i].body.value.currency +" " +highlightChallenge,
+              items: [],
+              challenge: challengeValue,
+              challengeId: [],
+              challengeType: [],
+              transactionId: []
+
+            };
+          
+             $scope.groups[i].items.push("To Account: "+$scope.transactionDetails[i].body.to.account_id); 
+             $scope.groups[i].items.push("Payment Status: "+$scope.transactionDetails[i].status);
+             $scope.groups[i].items.push("Transaction Id: "+$scope.transactionDetails[i].id);
+             
+             if($scope.transactionDetails[i].challenge !== undefined){
+
+                $scope.groups[i].items.push("Transaction has been challenged ");
+                $scope.groups[i].items.push("Challenge Id: "+$scope.transactionDetails[i].challenge.id);
+                $scope.groups[i].items.push("Challenge Type: "+$scope.transactionDetails[i].challenge.challenge_type);
+
+                $scope.groups[i].challengeId.push($scope.transactionDetails[i].challenge.id);
+                $scope.groups[i].challengeType.push($scope.transactionDetails[i].challenge.challenge_type);
+                $scope.groups[i].transactionId.push($scope.transactionDetails[i].id);
+             }
+
+             if($scope.transactionDetails[i].type=='WITHIN_BANK'){
               
-              var  highlightChallenge="";
-              var challengeValue=false;
-              if($scope.transactionDetails[i].challenge !== undefined){
-                  //$scope.groups[i].challenge.push("isChallenge","true");
-                  highlightChallenge="*";
-                  challengeValue=true;
+              withInBankCount++;
 
+             }
+              if($scope.transactionDetails[i].type=='INTER_BANK'){
+              interBankCount++;
+
+             }
+
+             if ($scope.transactionDetails[i].type=='INTERNATIONAL'){
+              internationBankCount++;
+             }
+          }
+          $scope.options = {  
+            chart: {
+              type: 'pieChart',
+              height: 500,
+              x: function(d){return d.key;},
+              y: function(d){return d.y;},
+              showLabels: true,
+              duration: 500,
+              labelThreshold: 0.01,
+              labelSunbeamLayout: true,
+              legend: {
+                margin: {
+                  top: 5,
+                  right: 35,
+                  bottom: 5,
+                  left: 0
+                }
               }
-
-
-              $scope.groups[i] = {
-                name:$scope.transactionDetails[i].body.value.amount + " "+$scope.transactionDetails[i].body.value.currency +" " +highlightChallenge,
-                items: [],
-                challenge: challengeValue,
-                challengeId: [],
-                challengeType: [],
-                transactionId: []
-
-              };
-            
-               $scope.groups[i].items.push("To Account: "+$scope.transactionDetails[i].body.to.account_id); 
-               $scope.groups[i].items.push("Payment Status: "+$scope.transactionDetails[i].status);
-               $scope.groups[i].items.push("Transaction Id: "+$scope.transactionDetails[i].id);
-               
-               if($scope.transactionDetails[i].challenge !== undefined){
-
-                  $scope.groups[i].items.push("Transaction has been challenged ");
-                  $scope.groups[i].items.push("Challenge Id: "+$scope.transactionDetails[i].challenge.id);
-                  $scope.groups[i].items.push("Challenge Type: "+$scope.transactionDetails[i].challenge.challenge_type);
-
-                  $scope.groups[i].challengeId.push($scope.transactionDetails[i].challenge.id);
-                  $scope.groups[i].challengeType.push($scope.transactionDetails[i].challenge.challenge_type);
-                  $scope.groups[i].transactionId.push($scope.transactionDetails[i].id);
-               }
-
-               if($scope.transactionDetails[i].type=='WITHIN_BANK'){
-                
-                withInBankCount++;
-
-               }
-                if($scope.transactionDetails[i].type=='INTER_BANK'){
-                interBankCount++;
-
-               }
-
-               if ($scope.transactionDetails[i].type=='INTERNATIONAL'){
-                internationBankCount++;
-               }
-
-
-            }  
-
-            $scope.options = {  
-                    chart: {
-                      type: 'pieChart',
-                      height: 500,
-                      x: function(d){return d.key;},
-                      y: function(d){return d.y;},
-                      showLabels: true,
-                      duration: 500,
-                      labelThreshold: 0.01,
-                      labelSunbeamLayout: true,
-                      legend: {
-                        margin: {
-                          top: 5,
-                          right: 35,
-                          bottom: 5,
-                          left: 0
-                        }
-                      }
-                    }
-                  };
-                  $scope.data = [  
-                    {
-                      key: "International",
-                      y: internationBankCount
-                    },
-                    {
-                      key: "Within-Bank",
-                      y: withInBankCount
-                    },
-                    {
-                      key: "Inter-Bank",
-                      y: interBankCount
-                    }
-                  ];
-
-
-
-        }, function(err){
-          console.error('ERR', err);
-          $ionicLoading.hide();
+            }
+          };
+          $scope.data = [  
+            {
+              key: "International",
+              y: internationBankCount
+            },
+            {
+              key: "Within-Bank",
+              y: withInBankCount
+            },
+            {
+              key: "Inter-Bank",
+              y: interBankCount
+            }
+          ];
+        }    
       });
-
+     
 
      $scope.answerChallenge = function( challengeId,challengeType,transactionId){
-                $scope.challengeId= challengeId;
-                $scope.challengeType=challengeType;
-                $scope.transactionId=transactionId;
-                $http.defaults.headers.common.Authorization=$scope.authorizationToken;
-                $scope.data = {};
-                // An elaborate, custom popup
-                var myPopup = $ionicPopup.show({
-                  template: '<input type="text" ng-model="data.wifi">',
-                  title: 'Enter Challenge Answer',
-                  subTitle: 'You need to answer the challenge',
-                  scope: $scope,
-                  buttons: [
-                    { text: 'Cancel' },
-                    {
-                      text: '<b>Submit</b>',
-                      type: 'button-positive',
-                      onTap: function(e) {
-                        if (!$scope.data.wifi) {
-                          //don't allow the user to close unless he enters wifi password
-                          e.preventDefault();
-                        } else {
-                          return $scope.data.wifi;
-                        }
-                      }
-                    }
-                  ]
-                });
+        $scope.challengeId= challengeId;
+        $scope.challengeType=challengeType;
+        $scope.transactionId=transactionId;
+        $http.defaults.headers.common.Authorization=$scope.authorizationToken;
+        $scope.data = {};
+        // An elaborate, custom popup
+        var myPopup = $ionicPopup.show({
+          template: '<input type="text" ng-model="data.wifi">',
+          title: 'Enter Challenge Answer',
+          subTitle: 'You need to answer the challenge',
+          scope: $scope,
+          buttons: [
+            { text: 'Cancel' },
+            {
+              text: '<b>Submit</b>',
+              type: 'button-positive',
+              onTap: function(e) {
+                if (!$scope.data.wifi) {
+                  //don't allow the user to close unless he enters wifi password
+                  e.preventDefault();
+                } else {
+                  return $scope.data.wifi;
+                }
+              }
+            }
+          ]
+        });
 
-                myPopup.then(function(res) {
-                  $http.defaults.headers.common.Authorization=$scope.authorizationToken;
-                  //$http.defaults.headers.common.Authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMzIyNzIsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiYjExYTY4ZTgtM2Y0Mi00ZGNlLWEwZDctZDY3NjMyYTg3ZDkxIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.r54m9YuW3X-G8hLXQI0kMJXNifuwtdCh87bhWUuHD80';
-                  //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMzcyMzksInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiMmNmMGJjNDYtZjE3MS00MzJmLWFmNWItMDJiOTY3ZGI2NzQ0IiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.AqAnlRx_3KKfBm4DT0KU4NVeErSmtJC0wFNkaNE-geM";
-                  $scope.challengeObject= {  "id":$scope.challengeId,  "answer":res};
-                
-                  $http.post('http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-request-types/'+$scope.challengeType+'/transaction-requests/'+$scope.transactionId+'/challenge',$scope.challengeObject).then(function(resp){
-                      console.log('Challenge Accepted successfully', resp); // JSON object
-                      
-                    }, function(err){
-                      console.error('ERR', err);
-                    });
-
-
-                  console.log('Tapped!', res);
-                });
-
-                // $timeout(function() {
-                //    myPopup.close(); //close the popup after 3 seconds for some reason
-                // }, 3000);
+        myPopup.then(function(res) {
+          $scope.challengeObject= {  "id":$scope.challengeId,  "answer":res};
+          transactionService.answerChallenge($scope.challengeType, $scope.transactionId, $scope.challengeObject);
+          console.log('Tapped!', res);
+        });
      }
   })
 
 
-  .controller('makeAPaymentCtrl', function($scope,$http, $ionicLoading, StorageServiceForToken,$ionicPopup) {
+  .controller('makeAPaymentCtrl', function($scope,$http, transactionService, $ionicLoading, StorageServiceForToken,$ionicPopup) {
      $scope.makePaymentObj = {
           "type": "",
           "from": {
@@ -356,69 +304,34 @@ angular.module('app.controllers', [])
               "account_id":""
             },  
           "value":{
-              "currency":"",
+              "currency":"GBP",
               "amount":""
             },
           "description":""
       }
 
-
-      $scope.transactionTypes = [];
+     
+      var promise = transactionService.getTransactionTypes();
+      promise.then(function(types) {
+          $scope.transactionTypes = types.data;
+      });
       
-       $scope.oauthData = StorageServiceForToken.getAll();
-        if($scope.oauthData!=null && $scope.oauthData.length>0){
-            $scope.authorizationToken = 'Bearer '+ $scope.oauthData[0].access_token;
-        }else{
-          $scope.accountDetails='First authenticate and then make this call.';
-        }
-        //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMjcwNDIsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiY2JkMDM4NDktNGRjNC00NDEyLWE0MzMtNjlhOGUyMTRkZmEyIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.bW2F9p4ABmGcTSwNmZn-wZinPmprX2alvhp_VhqSpr0";
-        $http.defaults.headers.common.Authorization=$scope.authorizationToken;
-        $ionicLoading.show();
-      $http.get('http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-request-types').then(function(resp){
-          $ionicLoading.hide();
-          console.log('Success', resp);
-          $scope.transactionTypes = resp.data;
-        }, function(err){
-          $ionicLoading.hide();
-          console.error('ERR', err);
-          $ionicLoading.hide();
-        });
 
       $scope.paymentSubmit = function(){
         console.log($scope.makePaymentObj);
-        $scope.oauthData = StorageServiceForToken.getAll();
-        if($scope.oauthData!=null && $scope.oauthData.length>0){
-            $scope.authorizationToken = 'Bearer '+ $scope.oauthData[0].access_token;
-        }else{
-          $scope.accountDetails='First authenticate and then make this call.';
-        }
-
-        $http.defaults.headers.common.Authorization=$scope.authorizationToken;  
-        //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMjcwNDIsInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiY2JkMDM4NDktNGRjNC00NDEyLWE0MzMtNjlhOGUyMTRkZmEyIiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.bW2F9p4ABmGcTSwNmZn-wZinPmprX2alvhp_VhqSpr0";
-         $http.post("http://169.44.112.56:8082/psd2api/banks/BARCGB/accounts/5437/owner/transaction-request-types/"+$scope.makePaymentObj.type+"/transaction-requests", $scope.makePaymentObj, {
-            
-        }).success(function(responseData) {
-            //do stuff with response
-            $ionicLoading.hide();
-            console.log('Success', responseData);
-            var alertPopup = $ionicPopup.alert({
-            title: 'Make a Payment',
-            template:'Transaction successfully submitted.'
-          });
-        });
-
+        transactionService.createTransactionRequest($scope.makePaymentObj.type, $scope.makePaymentObj);
       };
 
   })
 
 
   .controller('loginCtrl', function($scope, $http, $resource,LoginService, $state,$ionicPopup,StorageService, $localStorage,$ionicLoading ) {
-        
- 
-    if(StorageService.getAll().data !== undefined){
-           $state.go('menu.aboutPSD22');
+    //Login once functionality 
+    if( StorageService.getAll()[0] !== undefined ){
+      if(StorageService.getAll()[0].data!== undefined){
+             $state.go('menu.aboutPSD22');
+      }
     }
-
     
     $scope.click =  function(){
       $ionicLoading.show();
@@ -431,7 +344,7 @@ angular.module('app.controllers', [])
           $ionicLoading.hide();
           console.log('Success', resp);
           $scope.dataFromService=resp;
-          // StorageService.remove($scope.dataFromService)
+       //   StorageService.remove($scope.dataFromService);
           StorageService.add($scope.dataFromService) ;
           $state.go('menu.aboutPSD22');
            // JSON object
@@ -441,23 +354,11 @@ angular.module('app.controllers', [])
           $scope.dataFromService=err;
           $ionicLoading.hide();
         });
-      // LoginService.authenticateUser({email: this.userId, pwd: this.password}, {},
-      //   function(message) {
-      //     $scope.dataFromService=message;
-      //     // function to retrive the response
-      //     if($scope.dataFromService.status=='SUCCESS'){
-      //       StorageService.remove($scope.dataFromService);
-      //       //Persisting the user data in local storage
-      //       StorageService.add($scope.dataFromService) ;
-      //       $scope.loginSuccessful="Login was successful";
-      //       $state.go('menu.aboutPSD22');
-      //     }
-      //   });
       }
     })
 
 
-    .controller('subscriptionCtrl', function($scope,$http, $ionicLoading, StorageServiceForToken, $state,$rootScope) {
+    .controller('subscriptionCtrl', function($scope,$http, subscribeService, $ionicLoading, StorageServiceForToken, $state,$rootScope) {
        $scope.subscribeObj = {
             "username" : "",
             "accountId" : "",
@@ -481,34 +382,8 @@ angular.module('app.controllers', [])
         };
 
 
-        $scope.subscribe = function(){
-          $ionicLoading.show();
-          console.log($scope.subscribeObj);
-          $scope.oauthData = StorageServiceForToken.getAll();
-          if($scope.oauthData!=null && $scope.oauthData.length>0){
-              $scope.authorizationToken = 'Bearer '+ $scope.oauthData[0].access_token;
-          }else{
-            $scope.accountDetails='First authenticate and then make this call.';
-          }
-
-          $http.defaults.headers.common.Authorization=$scope.authorizationToken;  
-          //$http.defaults.headers.common.Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwMzcyMzksInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiMmNmMGJjNDYtZjE3MS00MzJmLWFmNWItMDJiOTY3ZGI2NzQ0IiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.AqAnlRx_3KKfBm4DT0KU4NVeErSmtJC0wFNkaNE-geM";
-          $http.post("http://169.44.112.56:8082/psd2api/subscription/request", $scope.subscribeObj, {
-              
-          }).success(function(responseData) {
-              //do stuff with response
-              $ionicLoading.hide();
-              console.log('Success', responseData);
-              $rootScope.$broadcast('enableMenus');
-              $ionicLoading.hide();      
-              $state.go('menu.aboutPSD22');   
-                   
-          }).error(function(data, status) {
-            console.error('Repos error', status, data);
-            $scope.dataFromService=data;
-            $ionicLoading.hide();
-          });
-
+        $scope.subscribe = function(){          
+          subscribeService.subscribe($scope.subscribeObj);
         };
 
     })
