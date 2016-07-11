@@ -1,16 +1,34 @@
 angular.module('app.controllers', [])
 
 
-.controller('MenuCtrl', function($scope, $rootScope, $ionicModal, $timeout) {  
-
+.controller('MenuCtrl', function($scope, $rootScope, $ionicModal, $timeout, StorageService,$ionicPopup, $state) {  
     $scope.enableSubMenu = false;
-
     $scope.$on('enableMenus', function(event) {
         $scope.enableSubMenu = true;
     });
 
-  })
+    $scope.logout =  function(){
 
+         var confirmPopup = $ionicPopup.confirm({
+           title: 'Logout',
+           template: 'Are you sure you want to logout?'
+         });
+
+         confirmPopup.then(function(res) {
+           if(res) {
+                StorageService.removeAll() ;
+               console.log('Logged out successfully.');
+               $state.go('login'); 
+
+           } else {
+               console.log('Not logging out');
+           }
+   });
+ };
+      // StorageServiceForToken.removeAll();
+
+      
+  })
 
 .controller('LoadingCtrl', function($scope, $ionicLoading) {
   $scope.show = function() {
@@ -83,7 +101,6 @@ angular.module('app.controllers', [])
                     if(subscriptionDetails.length && subscriptionDetails.length>0){
                         var accountID = subscriptionDetails[0].accountId;
                         localStorage.setItem("accountID", accountID);
-                        //l
                         //alert('GetAccountId: '+localStorage.getItem("accountID"));
                         //$state.go('menu.aboutPSD22');
                     }
@@ -172,7 +189,6 @@ angular.module('app.controllers', [])
             var  highlightChallenge="";
             var challengeValue=false;
             if($scope.transactionDetails[i].challenge !== undefined){
-                //$scope.groups[i].challenge.push("isChallenge","true");
                 highlightChallenge="*";
                 challengeValue=true;
             }
@@ -326,12 +342,12 @@ angular.module('app.controllers', [])
 
 
   .controller('loginCtrl', function($scope, $http, $resource,LoginService, $state,$ionicPopup,StorageService, $localStorage,$ionicLoading ) {
-        
- 
-    if(StorageService.getAll().data !== undefined){
-           $state.go('menu.aboutPSD22');
+    //Login once functionality 
+    if( StorageService.getAll()[0] !== undefined ){
+      if(StorageService.getAll()[0].data!== undefined){
+             $state.go('menu.aboutPSD22');
+      }
     }
-
     
     $scope.click =  function(){
       $ionicLoading.show();
@@ -344,7 +360,7 @@ angular.module('app.controllers', [])
           $ionicLoading.hide();
           console.log('Success', resp);
           $scope.dataFromService=resp;
-          // StorageService.remove($scope.dataFromService)
+       //   StorageService.remove($scope.dataFromService);
           StorageService.add($scope.dataFromService) ;
           $state.go('menu.aboutPSD22');
            // JSON object
@@ -354,18 +370,6 @@ angular.module('app.controllers', [])
           $scope.dataFromService=err;
           $ionicLoading.hide();
         });
-      // LoginService.authenticateUser({email: this.userId, pwd: this.password}, {},
-      //   function(message) {
-      //     $scope.dataFromService=message;
-      //     // function to retrive the response
-      //     if($scope.dataFromService.status=='SUCCESS'){
-      //       StorageService.remove($scope.dataFromService);
-      //       //Persisting the user data in local storage
-      //       StorageService.add($scope.dataFromService) ;
-      //       $scope.loginSuccessful="Login was successful";
-      //       $state.go('menu.aboutPSD22');
-      //     }
-      //   });
       }
     })
 
@@ -400,16 +404,18 @@ angular.module('app.controllers', [])
 
     })
 
-    .controller('signupCtrl', function($scope, CreateBankUser, SignUpService,$state,$ionicPopup, CreateClientForOAuth, $ionicLoading ) {
+    .controller('signupCtrl', function($scope, CreateBankUser,CreateBankAccount, SignUpService,$state,$ionicPopup, CreateClientForOAuth, $ionicLoading ) {
       $scope.signUpUser =  function(){
       $ionicLoading.show();
         //clearing the userProfile at the time of user login
       $scope.signupResponse=[];
+      
+
       //Create client for OAuth
       CreateBankUser.createBankUser(
         {  },
         {
-        username: this.firstName.charAt(0)+this.lastName,
+        username: this.firstName.charAt(0).toLowerCase()+this.lastName.toLowerCase(),
         password: this.password,
         role:'USER'
       },
@@ -422,6 +428,36 @@ angular.module('app.controllers', [])
       },function(message) {
         $ionicLoading.hide();
         $scope.createBankUser=message;
+      }
+
+      );
+
+      var accountNumber =this.phoneNumber;
+      
+      //Create bank account
+      CreateBankAccount.createBankAccount(
+        {  },
+        { 
+            "id" : accountNumber.toString().substr(accountNumber.toString().length - 4), 
+            "label" : "Bank", 
+            "number" : this.phoneNumber, 
+            "owners" : [ { "id" : this.firstName.charAt(0).toLowerCase()+this.lastName.toLowerCase(), "provider" : "https://www.barclays.co.uk", "display_name" : this.firstName+this.lastName } ], 
+            "type" : null, 
+            "balance" : { "currency" : "GBP", "amount" : 10000.01 }, 
+            "iban" : "BARCGB22", 
+            "swift_bic" : "BARCGB22XXX", 
+            "bank_id" : "BARCGB", 
+            "username" : this.firstName.charAt(0).toLowerCase()+this.lastName.toLowerCase()
+          },
+      function(message) {
+        $scope.createBankAccount=message;
+        $ionicLoading.hide();
+        // function to retrive the response
+        if($scope.createBankAccount.status=='SUCCESS'){
+        }
+      },function(message) {
+        $ionicLoading.hide();
+        $scope.createBankAccount=message;
       }
 
     );

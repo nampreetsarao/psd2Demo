@@ -1,17 +1,33 @@
 angular.module('app.controllers', [])
 
 
-.controller('MenuCtrl', function($scope, $rootScope, $ionicModal, $timeout) {  
+.controller('MenuCtrl', function($scope, $rootScope, $ionicModal, $timeout, StorageService,$ionicPopup, $state) {  
     $scope.enableSubMenu = false;
     $scope.$on('enableMenus', function(event) {
         $scope.enableSubMenu = true;
     });
 
     $scope.logout =  function(){
-       //StorageService.removeAll() ;
+
+         var confirmPopup = $ionicPopup.confirm({
+           title: 'Logout',
+           template: 'Are you sure you want to logout?'
+         });
+
+         confirmPopup.then(function(res) {
+           if(res) {
+                StorageService.removeAll() ;
+               console.log('Logged out successfully.');
+               $state.go('login'); 
+
+           } else {
+               console.log('Not logging out');
+           }
+   });
+ };
       // StorageServiceForToken.removeAll();
 
-    }    
+      
   })
 
 .controller('LoadingCtrl', function($scope, $ionicLoading) {
@@ -388,16 +404,18 @@ angular.module('app.controllers', [])
 
     })
 
-    .controller('signupCtrl', function($scope, CreateBankUser, SignUpService,$state,$ionicPopup, CreateClientForOAuth, $ionicLoading ) {
+    .controller('signupCtrl', function($scope, CreateBankUser,CreateBankAccount, SignUpService,$state,$ionicPopup, CreateClientForOAuth, $ionicLoading ) {
       $scope.signUpUser =  function(){
       $ionicLoading.show();
         //clearing the userProfile at the time of user login
       $scope.signupResponse=[];
+      
+
       //Create client for OAuth
       CreateBankUser.createBankUser(
         {  },
         {
-        username: this.firstName.charAt(0)+this.lastName,
+        username: this.firstName.charAt(0).toLowerCase()+this.lastName.toLowerCase(),
         password: this.password,
         role:'USER'
       },
@@ -410,6 +428,36 @@ angular.module('app.controllers', [])
       },function(message) {
         $ionicLoading.hide();
         $scope.createBankUser=message;
+      }
+
+      );
+
+      var accountNumber =this.phoneNumber;
+      
+      //Create bank account
+      CreateBankAccount.createBankAccount(
+        {  },
+        { 
+            "id" : accountNumber.toString().substr(accountNumber.toString().length - 4), 
+            "label" : "Bank", 
+            "number" : this.phoneNumber, 
+            "owners" : [ { "id" : this.firstName.charAt(0).toLowerCase()+this.lastName.toLowerCase(), "provider" : "https://www.barclays.co.uk", "display_name" : this.firstName+this.lastName } ], 
+            "type" : null, 
+            "balance" : { "currency" : "GBP", "amount" : 10000.01 }, 
+            "iban" : "BARCGB22", 
+            "swift_bic" : "BARCGB22XXX", 
+            "bank_id" : "BARCGB", 
+            "username" : this.firstName.charAt(0).toLowerCase()+this.lastName.toLowerCase()
+          },
+      function(message) {
+        $scope.createBankAccount=message;
+        $ionicLoading.hide();
+        // function to retrive the response
+        if($scope.createBankAccount.status=='SUCCESS'){
+        }
+      },function(message) {
+        $ionicLoading.hide();
+        $scope.createBankAccount=message;
       }
 
     );

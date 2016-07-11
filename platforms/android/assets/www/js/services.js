@@ -218,7 +218,7 @@ angular.module('app.services', ['ngResource','app-constants'])
           $ionicLoading.hide();        
           var alertPopup = $ionicPopup.alert({
             title: 'Success',
-            template:'Challenge accepted successfully:'
+            template:'Challenge accepted successfully.'
           });
         }, function(err){
           $ionicLoading.hide();
@@ -327,6 +327,21 @@ angular.module('app.services', ['ngResource','app-constants'])
             return data;
     })
 
+
+     //factory for create client for Oauth
+    .factory('CreateBankAccount', function($resource){
+        // var data = $resource('http://169.44.9.228:8080/mcabuddy/user/authenticate' , {}, {
+        var data = $resource('http://169.44.112.56:8081/psd2api/admin/account' , {}, {
+            createBankAccount:{
+                method:'POST',
+                headers: {
+                      'Content-Type': 'application/json'
+                  }
+                }
+            });
+            return data;
+    })
+
     //factory for sign up service
     .factory('InformationService', function($resource){
         var data = $resource('http://169.44.112.56:8084/psd2demoapp/info/:value' , {value:"@value"}, {
@@ -341,7 +356,7 @@ angular.module('app.services', ['ngResource','app-constants'])
         })
 
 // factory for ngstorage
-.factory ('StorageService', function ($localStorage) {
+.factory ('StorageService', function ($localStorage, $window) {
     $localStorage = $localStorage.$default({
       profileInformation: []
     });
@@ -352,16 +367,22 @@ angular.module('app.services', ['ngResource','app-constants'])
 
     var _add = function (thing) {
       $localStorage.profileInformation.push(thing);
-    }
+    };
 
     var _remove = function (thing) {
       $localStorage.profileInformation.splice($localStorage.profileInformation.indexOf(thing), 1);
-    }
+    };
+
+    var _removeAll = function (thing) {
+      //do nothing
+      $window.localStorage.clear();
+    };
 
     return {
         getAll: _getAll,
         add: _add,
-        remove: _remove
+        remove: _remove, 
+        removeAll: _removeAll
       };
 })
 
@@ -379,11 +400,11 @@ angular.module('app.services', ['ngResource','app-constants'])
 
     var _add = function (thing) {
       $localStorage.tokenInformation.push(thing);
-    }
+    };
 
     var _remove = function (thing) {
       $localStorage.tokenInformation.splice($localStorage.tokenInformation.indexOf(thing), 1);
-    }
+    };
 
     return {
         getAll: _getAll,
