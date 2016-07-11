@@ -331,7 +331,7 @@ angular.module('app.services', ['ngResource','app-constants'])
      //factory for create client for Oauth
     .factory('CreateBankAccount', function($resource){
         // var data = $resource('http://169.44.9.228:8080/mcabuddy/user/authenticate' , {}, {
-        var data = $resource('http://169.44.112.56:8081/psd2api/admin/account' , {}, {
+        var data = $resource('http://169.44.112.56:8082/psd2api/admin/account' , {}, {
             createBankAccount:{
                 method:'POST',
                 headers: {

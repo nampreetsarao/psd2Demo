@@ -453,11 +453,11 @@ angular.module('app.controllers', [])
         $scope.createBankAccount=message;
         $ionicLoading.hide();
         // function to retrive the response
-        if($scope.createBankAccount.status=='SUCCESS'){
-        }
+        alert('Success in create bank account');
       },function(message) {
         $ionicLoading.hide();
         $scope.createBankAccount=message;
+        alert('Failure');
       }
 
     );
