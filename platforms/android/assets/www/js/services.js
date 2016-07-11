@@ -110,13 +110,15 @@ angular.module('app.services', ['ngResource','app-constants'])
           //subscriptionDetails=resp;
           $ionicLoading.hide();
           $rootScope.$broadcast('enableMenus');
+
           deferred.resolve(resp);  
+          
         }, function(err){
           console.error('ERR', err);
           $ionicLoading.hide();
           var alertPopup = $ionicPopup.alert({
             title: 'Alert',
-            template:'Error in getting subscrioption information:'+err.data.error+ ".More: "+err.statusText
+            template:'Error in getting subscription information:'+err.data.error+ ".More: "+err.statusText
           });
         }) 
       return deferred.promise;
@@ -150,6 +152,10 @@ angular.module('app.services', ['ngResource','app-constants'])
                    
           }).error(function(data, status) {
             console.error('Repos error', status, data);
+            var alertPopup = $ionicPopup.alert({
+              title: 'Alert',
+              template:'Error in getting subscription information:'+err.data.error+ ".More: "+err.statusText
+            });
             //$scope.dataFromService=data;
             $ionicLoading.hide();
           });

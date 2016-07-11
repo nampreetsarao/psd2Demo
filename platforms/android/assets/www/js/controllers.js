@@ -101,7 +101,7 @@ angular.module('app.controllers', [])
                     if(subscriptionDetails.length && subscriptionDetails.length>0){
                         var accountID = subscriptionDetails[0].accountId;
                         localStorage.setItem("accountID", accountID);
-                        //alert('GetAccountId: '+localStorage.getItem("accountID"));
+                        alert('GetAccountId: '+localStorage.getItem("accountID"));
                         //$state.go('menu.aboutPSD22');
                     }
                     else{
