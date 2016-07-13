@@ -1,22 +1,10 @@
  <ion-view title="About PSD2" id="page3" class=" ">
     <ion-content padding="true" class="has-header">
-
-      <!-- <ion-list>
-  <ion-item ng-repeat="x in allAccountDetails.data">
-  Some data
-  </ion-item>
-  <ion-item href="#/side-menu21/page1">
-    Details
-  </ion-item>
-</ion-list> -->
-<!-- <a onclick="window.open('http://www.nraboy.com/contact', '_system', 'location=yes'); return false;">will this open</a>.</p> -->
-      <!-- {{bookmark.response.addtionalInfo[]}} -->
         <p id="aboutPSD22-markdown2" style="color:#000000;" class=" ">{{general.response.info}}</p>
         <p id="aboutPSD22-markdown2" style="color:#000000;" class=" ">{{ibmInformation.response.info}}</p>
         <p id="aboutPSD22-markdown2" style="color:#000000;" class=" " ng-repeat="x in bookmarks">
               <strong>{{x.name}}</strong>
-              <a onclick="window.open('{{x.link}}', '_system', 'location=yes'); return false;">link</a>.</p>
-              <!-- <a ng-click="window.cordova.InAppBrowser.open('{{x.link}}', '_blank', 'location=no,clearsessioncache=yes,clearcache=yes,toolbar=yes');">link</a>.</p> -->
+              <a ng-click="clickLink('{{x.link}}')" class="">link.</a>
         </p>
     </ion-content>
 </ion-view>

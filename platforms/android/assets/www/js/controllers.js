@@ -16,19 +16,16 @@ angular.module('app.controllers', [])
 
          confirmPopup.then(function(res) {
            if(res) {
-                StorageService.removeAll() ;
+               StorageService.removeAll() ;
+               $scope.enableSubMenu = false;
                console.log('Logged out successfully.');
                $state.go('login'); 
-
            } else {
                console.log('Not logging out');
            }
    });
  };
-      // StorageServiceForToken.removeAll();
-
-      
-  })
+ })
 
 .controller('LoadingCtrl', function($scope, $ionicLoading) {
   $scope.show = function() {
@@ -92,19 +89,19 @@ angular.module('app.controllers', [])
                //Persisting the token data in local storage
                StorageServiceForToken.remove($scope.oauthData);
                StorageServiceForToken.add($scope.oauthData) ;
-
+             // alert('before calling subscription service '); 
                //check subscription
                var subscriptionDetails = {};
                var promise = subscribeService.getSubscriptionInfo();
                 promise.then(function(resp) {
                     subscriptionDetails = resp.data;
+                    //alert('subscriptionDetails: '+subscriptionDetails.length);
                     if(subscriptionDetails.length && subscriptionDetails.length>0){
                         var accountID = subscriptionDetails[0].accountId;
                         localStorage.setItem("accountID", accountID);
-                        alert('GetAccountId: '+localStorage.getItem("accountID"));
+                        //alert('GetAccountId: '+localStorage.getItem("accountID"));
                         //$state.go('menu.aboutPSD22');
-                    }
-                    else{
+                    }else{
                         $state.go('menu.subscription');
                     }
                 });               
@@ -127,6 +124,7 @@ angular.module('app.controllers', [])
     //Fetch general Information details from the API
     InformationService.general({value : 'general' }, {},
     function(message) {
+      
       $scope.general=message;
       // function to retrive the response
       if($scope.general.status=='SUCCESS'){
@@ -137,6 +135,7 @@ angular.module('app.controllers', [])
     //Fetch  IBM information details from the API
     InformationService.general({value : 'ibm' }, {},
     function(message) {
+      
       $scope.ibmInformation=message;
     });
 
@@ -144,9 +143,18 @@ angular.module('app.controllers', [])
     InformationService.general({value : 'bookmarks' }, {},
     function(message) {
       $scope.bookmarks=message.response.additionalInfo;
+      
     });
 
+    $scope.clickLink =  function(link){
+      //alert(link);
+      window.open(link, '_system', 'location=yes');
+
+    };
+
     $ionicLoading.hide();
+
+    
 
   })
 
@@ -341,7 +349,7 @@ angular.module('app.controllers', [])
   })
 
 
-  .controller('loginCtrl', function($scope, $http, $resource,LoginService, $state,$ionicPopup,StorageService, $localStorage,$ionicLoading ) {
+  .controller('loginCtrl', function($scope, $http, $rootScope, $resource,LoginService, $state,$ionicPopup,StorageService,StorageServiceForToken, $localStorage,$ionicLoading ) {
     //Login once functionality 
     if( StorageService.getAll()[0] !== undefined ){
       if(StorageService.getAll()[0].data!== undefined){
@@ -349,6 +357,13 @@ angular.module('app.controllers', [])
       }
     }
     
+    // if(StorageServiceForToken.getAll()[0]!=undefined){
+    //   if(StorageServiceForToken.getAll()[0].data!== undefined){
+    //          $rootScope.$broadcast('enableMenus');
+    //          $scope.enableSubMenu = true;
+    //   }
+    // }
+
     $scope.click =  function(){
       $ionicLoading.show();
       //clearing the userProfile at the time of user login
@@ -376,6 +391,7 @@ angular.module('app.controllers', [])
 
     .controller('subscriptionCtrl', function($scope,$http, subscribeService, $ionicLoading, StorageServiceForToken, $state,$rootScope) {
        $scope.subscribeObj = {
+        "subscriptionInfo":{
             "username" : "",
             "accountId" : "",
             "bank_id" : "BARCGB",
@@ -395,6 +411,7 @@ angular.module('app.controllers', [])
                 }
                 ],
             "transaction_request_types": [{"value": "WITHIN_BANK"}, {"value": "INTER_BANK"}, {"value": "INTERNATIONAL"}]
+            }
         };
 
 
@@ -432,9 +449,8 @@ angular.module('app.controllers', [])
 
       );
 
-      var accountNumber =this.phoneNumber;
-      
       //Create bank account
+      var accountNumber =this.phoneNumber;
       CreateBankAccount.createBankAccount(
         {  },
         { 
@@ -453,11 +469,11 @@ angular.module('app.controllers', [])
         $scope.createBankAccount=message;
         $ionicLoading.hide();
         // function to retrive the response
-        alert('Success in create bank account');
+        //alert('Success in create bank account');
       },function(message) {
         $ionicLoading.hide();
         $scope.createBankAccount=message;
-        alert('Failure');
+        alert('Failure in creating bank account.');
       }
 
     );

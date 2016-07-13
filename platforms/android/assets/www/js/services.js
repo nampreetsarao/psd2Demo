@@ -7,14 +7,14 @@ angular.module('app-constants', [])
 .constant("server", "169.44.112.56")
 .constant("port", "8082")
 .constant("baseURL","/psd2api/")
-.constant("accNo","8899")
+//.constant("accNo","8899")
 
-.factory('constantService', function ($http, server, port, baseURL, accNo) {
+.factory('constantService', function ($http, server, port, baseURL) {
     return {
         server:server,
         port: port,
-        baseURL: baseURL,
-        accNo : accNo
+        baseURL: baseURL
+        
     }
 });
 
@@ -69,6 +69,7 @@ angular.module('app.services', ['ngResource','app-constants'])
       }else{
         accountDetails='First authenticate and then make this call.';
       }
+
       $http.defaults.headers.common.Authorization=authorizationToken;
       //$http.defaults.headers.common.Authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjcwNDE1NTksInVzZXJfbmFtZSI6Im5zaW5naCIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiM2MyNTk3OWYtMmVkNS00YTdjLTgzNjYtNTYyMzI2NzQ0ZGQ4IiwiY2xpZW50X2lkIjoicG9zdG1hbiIsInNjb3BlIjpbIndyaXRlIl19.sv9YjcD1bbjR42enR-B9QQ040x5oO0Y7TKpQyIJu88o';
       $http.get('http://'+constantService.server+':'+constantService.port+'/psd2api/banks/BARCGB/accounts/'+localStorage.getItem("accountID")+'/owner/account').then(function(resp){
@@ -125,6 +126,7 @@ angular.module('app.services', ['ngResource','app-constants'])
     };
 
     this.subscribe = function(subscribeObj) {
+      //alert(JSON.stringify(subscribeObj));
       $ionicLoading.show(); 
       var authorizationToken = '';
       var oauthData = StorageServiceForToken.getAll();
@@ -134,21 +136,36 @@ angular.module('app.services', ['ngResource','app-constants'])
         //accountDetails='First authenticate and then make this call.';
         alert('First authenticate and then make this call.');
       }
+      //alert("URL formed"+"http://"+constantService.server+':'+constantService.port+"/psd2api/subscription/request");
       $http.defaults.headers.common.Authorization=authorizationToken;
       //$http.defaults.headers.common.Authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0Njc4Nzc4NzUsInVzZXJfbmFtZSI6InJwYWRhbGUiLCJhdXRob3JpdGllcyI6WyJVU0VSIl0sImp0aSI6IjAwMTU0OGI5LTJiZGItNGNjOC05ZGM1LTFhMjYzMmIzZTE1NSIsImNsaWVudF9pZCI6InBvc3RtYW4iLCJzY29wZSI6WyJ3cml0ZSJdfQ.TFXuTjOd1w719HJ5VvNgBehuWU1XLX-7sYBEZxOn_aE';
-      $http.post("http://"+constantService.server+':'+constantService.port+"/psd2api/subscription/request", subscribeObj, {
-              
-          }).success(function(responseData) {
+      $http.post("http://"+constantService.server+':'+constantService.port+"/psd2api/subscription/request", subscribeObj).
+      success(function(responseData) {
               //do stuff with response
+              //alert(JSON.stringify(responseData));
               $ionicLoading.hide();
               console.log('Success', responseData);
               
               var accountID = responseData.subscriptionInfo.accountId;
               localStorage.setItem("accountID", accountID);
-              
+              //alert("accountID" +accountID);
               $rootScope.$broadcast('enableMenus');
+
+              var answerSubscriptionChallenge= {  "id":responseData.challenge.id,  "answer":"123345"};
+              //answering the challenge
+              //alert('Auth token for answer challenge:'+authorizationToken);
+              $http.defaults.headers.common.Authorization=authorizationToken;
+              $http.post("http://"+constantService.server+':'+constantService.port+"/psd2api/admin/subscription/"+responseData.id, answerSubscriptionChallenge).
+              success(function(responseData) {
+                //alert("Subscription challenge answered successfully.");
+                 }).error(function(data, status) {
+                    console.error('Repos error', status, data);
+                  //  alert("Subscription challenge answered failed."+JSON.stringify(data));
+                    $ionicLoading.hide();
+              });
+
               $ionicLoading.hide();      
-              $state.go('menu.aboutPSD22');   
+              $state.go('menu.exploreAPI');   
                    
           }).error(function(data, status) {
             console.error('Repos error', status, data);
