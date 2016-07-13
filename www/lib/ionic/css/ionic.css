@@ -6569,7 +6569,7 @@ button.item.item-button-right {
 .list-header {
   margin-top: 20px;
   padding: 5px 15px;
-  background-color: transparent;
+  background-color: f8f8f8;
   color: #222;
   font-weight: bold; }
 
