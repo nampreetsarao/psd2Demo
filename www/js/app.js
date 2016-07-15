@@ -7,8 +7,6 @@
 // 'starter.controllers' is found in controllers.js
 var ngModule = angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.services', 'app.directives', 'ngResource','ngCordova','LocalStorageModule','ngStorage','nvd3']);
 
-
-
 ngModule.run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
