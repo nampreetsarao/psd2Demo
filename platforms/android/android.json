@@ -15,6 +15,42 @@
                         {
                             "xml": "<feature name=\"InAppBrowser\"><param name=\"android-package\" value=\"org.apache.cordova.inappbrowser.InAppBrowser\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"BarcodeScanner\"><param name=\"android-package\" value=\"com.phonegap.plugins.barcodescanner.BarcodeScanner\" /></feature>",
+                            "count": 1
+                        }
+                    ]
+                }
+            },
+            "AndroidManifest.xml": {
+                "parents": {
+                    "/manifest/application": [
+                        {
+                            "xml": "<activity android:clearTaskOnLaunch=\"true\" android:configChanges=\"orientation|keyboardHidden|screenSize\" android:exported=\"false\" android:name=\"com.google.zxing.client.android.CaptureActivity\" android:theme=\"@android:style/Theme.NoTitleBar.Fullscreen\" android:windowSoftInputMode=\"stateAlwaysHidden\"><intent-filter><action android:name=\"com.google.zxing.client.android.SCAN\" /><category android:name=\"android.intent.category.DEFAULT\" /></intent-filter></activity>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<activity android:label=\"Share\" android:name=\"com.google.zxing.client.android.encode.EncodeActivity\"><intent-filter><action android:name=\"com.phonegap.plugins.barcodescanner.ENCODE\" /><category android:name=\"android.intent.category.DEFAULT\" /></intent-filter></activity>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<activity android:label=\"Share\" android:name=\"com.google.zxing.client.android.HelpActivity\"><intent-filter><action android:name=\"android.intent.action.VIEW\" /><category android:name=\"android.intent.category.DEFAULT\" /></intent-filter></activity>",
+                            "count": 1
+                        }
+                    ],
+                    "/manifest": [
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.CAMERA\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.FLASHLIGHT\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-feature android:name=\"android.hardware.camera\" android:required=\"false\" />",
+                            "count": 1
                         }
                     ]
                 }
@@ -27,6 +63,12 @@
         },
         "cordova-plugin-inappbrowser": {
             "PACKAGE_NAME": "com.ionicframework.psd2105582"
+        },
+        "cordova-plugin-compat": {
+            "PACKAGE_NAME": "com.ionicframework.psd2105582"
+        },
+        "phonegap-plugin-barcodescanner": {
+            "PACKAGE_NAME": "com.ionicframework.psd2105582"
         }
     },
     "dependent_plugins": {},
@@ -38,10 +80,19 @@
                 "cordova.InAppBrowser.open",
                 "window.open"
             ]
+        },
+        {
+            "file": "plugins/phonegap-plugin-barcodescanner/www/barcodescanner.js",
+            "id": "phonegap-plugin-barcodescanner.BarcodeScanner",
+            "clobbers": [
+                "cordova.plugins.barcodeScanner"
+            ]
         }
     ],
     "plugin_metadata": {
         "cordova-plugin-whitelist": "1.2.3-dev",
-        "cordova-plugin-inappbrowser": "1.4.0"
+        "cordova-plugin-inappbrowser": "1.4.0",
+        "cordova-plugin-compat": "1.0.0",
+        "phonegap-plugin-barcodescanner": "6.0.1"
     }
 }

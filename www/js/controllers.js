@@ -316,7 +316,7 @@ angular.module('app.controllers', [])
   })
 
 
-  .controller('makeAPaymentCtrl', function($scope,$http, transactionService, $ionicLoading, StorageServiceForToken,$ionicPopup) {
+  .controller('makeAPaymentCtrl', function($scope,$http, transactionService, $ionicLoading, StorageServiceForToken,$ionicPopup,$cordovaBarcodeScanner) {
      $scope.makePaymentObj = {
           "type": "",
           "from": {
@@ -346,6 +346,27 @@ angular.module('app.controllers', [])
         transactionService.createTransactionRequest($scope.makePaymentObj.type, $scope.makePaymentObj);
       };
 
+
+     $scope.scanForPayment = function(){
+       $cordovaBarcodeScanner.scan().then(function(imageData) {
+       //     alert(imageData.text);
+            console.log("Barcode Format -> " + imageData.format);
+            console.log("Cancelled -> " + imageData.cancelled);
+
+            var dataFromBarCode= imageData.text.split(':');
+   //         alert("in array at 0: "+dataFromBarCode[0]);
+            $scope.makePaymentObj.to.account_id =parseInt(dataFromBarCode[1]);
+ //           alert("in array at 1: "+dataFromBarCode[1]);
+            $scope.makePaymentObj.value.amount=parseInt(dataFromBarCode[0])
+     //       alert("in array at 2: "+dataFromBarCode[2]);
+            $scope.makePaymentObj.description=dataFromBarCode[2];
+            //$scope.makePaymentObj.value.amount=100;
+        }, function(error) {
+            console.log("An error happened -> " + error);
+        });
+        
+      };
+  
   })
 
 

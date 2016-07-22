@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="C:\NPS\ibmDev\psd2\ionic\11JulyChanges\psd2\platforms\android\CordovaLib\assets"/></dataSet><dataSet config="release"><source path="C:\NPS\ibmDev\psd2\ionic\11JulyChanges\psd2\platforms\android\CordovaLib\src\release\assets"/></dataSet></merger>

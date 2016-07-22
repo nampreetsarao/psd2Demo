@@ -8,6 +8,9 @@
     <feature name="InAppBrowser">
         <param name="android-package" value="org.apache.cordova.inappbrowser.InAppBrowser" />
     </feature>
+    <feature name="BarcodeScanner">
+        <param name="android-package" value="com.phonegap.plugins.barcodescanner.BarcodeScanner" />
+    </feature>
     <icon density="ldpi" src="resources\android\icon\appIcon.png" />
     <icon density="mdpi" src="resources\android\icon\appIcon.png" />
     <icon density="hdpi" src="resources\android\icon\appIcon.png" />
